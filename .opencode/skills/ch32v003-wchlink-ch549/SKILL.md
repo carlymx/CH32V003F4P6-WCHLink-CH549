@@ -106,25 +106,32 @@ tools/ch32v003fun/minichlink/minichlink -C ardulink \
 .opencode/skills/ch32v003-wchlink-ch549/scripts/nuevo-proyecto.sh /ruta/al/proyecto-nuevo
 ```
 
-Deja el proyecto listo: `platformio.ini` con la grabación ya puesta, `flash.sh`
-ejecutable y un `src/main.cpp` con el blink seguro de PC0. (No sobreescribe nada.)
+Deja el proyecto listo y **autocontenido**: `platformio.ini` sin rutas,
+`flash.sh` ejecutable, `src/main.cpp` con el blink seguro de PC0, `.vscode/`
+(tareas y ajustes), `.gitignore` y `minichlink` descargado dentro de
+`<proyecto>/tools/`. (No sobreescribe nada.)
 
-A mano serían estas dos plantillas: `templates/platformio.ini` y
-`templates/flash.sh`, copiadas a la raíz del proyecto.
-
-Las dos líneas que nunca pueden faltar en el `[env:...]`:
+🚫 **Nunca pongas rutas absolutas en `upload_command`** (ni `MINICHLINK=/home/…`).
+Las dos líneas correctas son siempre estas dos, tal cual:
 
 ```ini
 upload_protocol = custom
 upload_command  = ./flash.sh $SOURCE
 ```
 
-Nunca usar `upload_protocol = wch-link` / `minichlink` / `wlink` / `isp`:
+Si el proyecto necesita una herramienta, **se descarga dentro del propio
+proyecto**: de eso se encarga `flash.sh` (`--preparar` para forzarlo).
+
+Tampoco uses `upload_protocol = wch-link` / `minichlink` / `wlink` / `isp`:
 ninguno entiende nuestro programador (comprobado: minichlink sin `-C ardulink`
 responde `Could not initialize any supported programmers`).
 
-Antes de dar el trabajo por hecho: `pio run` (tiene que decir `SUCCESS`) y
-`SIMULAR=1 ./flash.sh` (comprueba sin grabar).
+Antes de dar el trabajo por hecho: `pio run` (tiene que decir `SUCCESS`),
+`SIMULAR=1 ./flash.sh`, y que el `.ini` **no** tenga rutas absolutas:
+
+```sh
+grep -nE "/(home|Users|root)/" platformio.ini && echo "MAL: hay rutas absolutas"
+```
 
 Receta completa, trampas y cómo mantener la plantilla sincronizada, en
 `references/proyecto-nuevo.md`.

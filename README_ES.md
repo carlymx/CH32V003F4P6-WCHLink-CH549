@@ -560,18 +560,30 @@ upload_command  = ./flash.sh $SOURCE
 > programador:
 > - `wlink` habla el protocolo del WCH-LinkE → falla.
 > - `wch-link` usa el OpenOCD de WCH → falla.
-> - `minichlink` invoca `~/.platformio/packages/tool-minichlink/minichlink`, que
->   **no está instalado** (el paquete existe pero vacío) y además no pasa `-C ardulink`.
+> - `minichlink` invoca su propio binario **sin `-C ardulink`** → `Could not
+>   initialize any supported programmers` (comprobado en hardware).
 > - `isp` espera el bootloader del CH32V003, que no tiene.
 >
 > Con `custom` controlamos el comando exacto y el proyecto queda autocontenido.
 
 `flash.sh` (incluido en el proyecto) hace:
 
-1. Localiza `minichlink` y el firmware (convierte `.elf` → `.bin` si hace falta).
-2. Busca el puerto por su **ID USB** (`/dev/serial/by-id/usb-Deqing_CH55xduino_CH55x-if00`)
+1. **Localiza `minichlink`**: la variable `MINICHLINK`, `<proyecto>/tools/minichlink/`,
+   `tools/ch32v003fun/minichlink/` subiendo carpetas, el `PATH`… y, si no lo
+   encuentra, **lo descarga dentro del propio proyecto** en
+   `<proyecto>/tools/minichlink/`. No usa ninguna ruta absoluta, así que el
+   proyecto es **autocontenido**: se puede copiar a otra máquina y sigue
+   funcionando.
+2. Localiza el firmware —acepta el `.elf` que le pasa PlatformIO en `$SOURCE`, o
+   busca `.pio/build/*/firmware.elf`— y lo convierte a `.bin` si hace falta.
+3. Busca el puerto por su **ID USB** (`/dev/serial/by-id/usb-Deqing_CH55xduino_CH55x-if00`)
    en lugar de por número, para que no falle si el `ttyACM` cambia.
-3. Ejecuta `minichlink -C ardulink -c <puerto> -w <bin> flash -b`.
+4. Ejecuta `minichlink -C ardulink -c <puerto> -w <bin> flash -b`.
+
+Opciones: `./flash.sh` (graba lo último compilado), `--preparar` (asegura
+`minichlink`), `--info` (información del chip), `--simular` (no graba) y
+`--help`. Variables: `MINICHLINK`, `MINICHLINK_URL`, `OBJCOPY`, `PUERTO`,
+`SIMULAR=1`.
 
 ### 8.2 Comandos
 

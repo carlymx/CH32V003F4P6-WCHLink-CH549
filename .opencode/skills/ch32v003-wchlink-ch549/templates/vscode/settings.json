@@ -1,0 +1,30 @@
+{
+  // =====================================================================
+  //  Ajustes del proyecto CH32V003F4P6 (WCH-Link CH549 reflasheado)
+  //  Este fichero va con el proyecto: se aplica al abrir esta carpeta.
+  // =====================================================================
+
+  // ---- PlatformIO -----------------------------------------------------
+  // El monitor serie NO sirve en este montaje: el "Serial" del chip esta en
+  // PD5/PD6 y no llega al USB del programador. Cerrarlo antes de grabar
+  // evita el clasico fallo de "puerto ocupado".
+  "platformio-ide.autoCloseSerialMonitor": true,
+  "platformio-ide.autoRebuildAutocompleteIndex": true,
+
+  // ---- Explorador: la compilacion solo estorba ------------------------
+  "files.exclude": {
+    "**/.pio": true
+  },
+  "search.exclude": {
+    "**/.pio": true
+  },
+
+  // ---- Cabeceras del core: se entienden como C++ ----------------------
+  "files.associations": {
+    "*.h": "cpp",
+    "*.hpp": "cpp"
+  },
+
+  // ---- Corrector ortografico ------------------------------------------
+  "cSpell.language": "en,es"
+}

@@ -1,0 +1,46 @@
+{
+  // =====================================================================
+  //  Tareas EXTRA del proyecto (las que PlatformIO no trae de serie)
+  //
+  //  Para COMPILAR y GRABAR no hace falta nada de aqui: PlatformIO ya
+  //  registra sus propias tareas y botones.
+  //     Compilar -> Ctrl+Alt+B      Grabar -> Ctrl+Alt+U
+  //  (o los botones de la barra inferior de PlatformIO)
+  //
+  //  Uso de estas:  Terminal > Run Task...  (Ctrl+Shift+P > "Run Task")
+  //
+  //  Todas llaman a ./flash.sh, que es autocontenido: si no encuentra
+  //  minichlink lo descarga en <proyecto>/tools/minichlink/. Asi funcionan
+  //  igual si copias el proyecto a otro sitio.
+  // =====================================================================
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Reutiliza el ultimo firmware ya compilado, sin volver a compilar.
+      "label": "Grabar solo (sin recompilar)",
+      "type": "shell",
+      "command": "./flash.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      // Por si falta la herramienta (proyecto recien clonado, o sin red antes).
+      "label": "Preparar minichlink",
+      "type": "shell",
+      "command": "./flash.sh --preparar",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      // Lee la cabecera del chip: modelo, tamano de flash y proteccion.
+      "label": "Ver informacion del chip",
+      "type": "shell",
+      "command": "./flash.sh --info",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    }
+  ]
+}

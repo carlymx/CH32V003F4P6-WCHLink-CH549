@@ -41,16 +41,30 @@ este comando hacen exactamente lo mismo.
 
 ### Qué hace `flash.sh`
 
-1. Averigua su propia ruta y de ahí la raíz del repositorio (es **independiente
-   de dónde se ejecute**).
-2. Localiza `tools/ch32v003fun/minichlink/minichlink`.
+1. Averigua su propia ruta (funciona desde cualquier directorio).
+2. **Localiza `minichlink`**: `$MINICHLINK` → `<proyecto>/tools/minichlink/` →
+   `tools/ch32v003fun/minichlink/` subiendo carpetas → `PATH` → y si no lo
+   encuentra, **lo descarga dentro del proyecto** en `<proyecto>/tools/minichlink/`.
+   Así el proyecto es **autocontenido** (ver `proyecto-nuevo.md`).
 3. Elige el puerto: `$PUERTO` si está definido, si no el enlace `by-id`
    `usb-Deqing_CH55xduino_CH55x-if00`, y si no `/dev/ttyACM0`.
 4. Si le pasan un `.elf` (lo normal desde PlatformIO) lo convierte a `.bin` con
    `~/.platformio/packages/toolchain-riscv/bin/riscv-wch-elf-objcopy`.
 5. Ejecuta `minichlink -C ardulink -c <puerto> -w <bin> flash -b`.
 
-Variables que se pueden forzar: `PUERTO`, `MINICHLINK`, `OBJCOPY`.
+### Opciones de `flash.sh`
+
+| Uso | Efecto |
+|---|---|
+| `./flash.sh` | Graba el último firmware compilado |
+| `./flash.sh firmware.elf` | Graba ese firmware (PlatformIO pasa `$SOURCE`) |
+| `./flash.sh --preparar` | Asegura `minichlink` (lo descarga si falta) |
+| `./flash.sh --info` | Muestra la información del chip |
+| `./flash.sh --simular` | Dice lo que haría, sin grabar nada |
+| `./flash.sh --help` | Ayuda |
+
+Variables que se pueden forzar: `PUERTO`, `MINICHLINK`, `MINICHLINK_URL`,
+`OBJCOPY`, `SIMULAR=1`.
 
 ## 3. Grabar a mano (sin PlatformIO)
 
@@ -116,7 +130,7 @@ Por orden, de menos a más agresivo:
 
 | Cosa | Ruta |
 |---|---|
-| `minichlink` | `tools/ch32v003fun/minichlink/minichlink` |
+| `minichlink` | 1.º `<proyecto>/tools/minichlink/minichlink`; si no, `tools/ch32v003fun/minichlink/minichlink`; si no, en el `PATH`; si no, **se descarga** |
 | `objcopy` | `~/.platformio/packages/toolchain-riscv/bin/riscv-wch-elf-objcopy` |
 | Firmware compilado | `ch32v003-blink/.pio/build/ch32v003f4p6/firmware.{elf,bin}` |
 | PlatformIO Core | `~/.platformio/penv/bin/pio` (o `pio` en el PATH) |

@@ -8,6 +8,10 @@
   //  (o los botones de la barra inferior de PlatformIO)
   //
   //  Uso de estas:  Terminal > Run Task...  (Ctrl+Shift+P > "Run Task")
+  //
+  //  Todas llaman a ./flash.sh, que es autocontenido: si no encuentra
+  //  minichlink lo descarga en <proyecto>/tools/minichlink/. Asi estas
+  //  tareas funcionan igual si copias el proyecto a otro sitio.
   // =====================================================================
   "version": "2.0.0",
   "tasks": [
@@ -21,15 +25,20 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
     },
     {
+      // Por si falta la herramienta (proyecto recien clonado o sin red antes).
+      "label": "Preparar minichlink",
+      "type": "shell",
+      "command": "./flash.sh --preparar",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
       // Lee la cabecera del chip: modelo, tamano de flash y proteccion.
       "label": "Ver informacion del chip",
       "type": "shell",
-      "command": "${workspaceFolder}/../tools/ch32v003fun/minichlink/minichlink",
-      "args": [
-        "-C", "ardulink",
-        "-c", "/dev/serial/by-id/usb-Deqing_CH55xduino_CH55x-if00",
-        "-i"
-      ],
+      "command": "./flash.sh --info",
+      "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": [],
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
     },

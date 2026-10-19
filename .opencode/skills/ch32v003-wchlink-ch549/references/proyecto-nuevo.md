@@ -31,69 +31,104 @@ El board trae `upload.protocol = wch-link` por defecto y admite
 
 ---
 
-## 3. Procedimiento para el agente ⭐
+## 3. Regla de oro: el proyecto es **autocontenido** ⭐
 
-Cuando te pidan **crear un proyecto nuevo** para el CH32V003F4P6, haz esto.
-No improvises un `platformio.ini`: usa las plantillas de esta skill.
+El proyecto nuevo **no debe depender de este repositorio** ni de rutas absolutas.
 
-### 3.1 Vía rápida (recomendada): el script
+- ✅ `upload_command  = ./flash.sh $SOURCE` → ruta **relativa al proyecto**.
+- ❌ `upload_command  = MINICHLINK=/home/tu-usuario/.../minichlink ./flash.sh $SOURCE`
+- ❌ Cualquier `/home/...`, `~/...` o ruta al repositorio RiscV.
+
+Si hace falta una herramienta, se **descarga dentro del propio proyecto**
+(`<proyecto>/tools/`). De eso se encarga `flash.sh` solo.
+
+## 4. Procedimiento para el agente
+
+Cuando te pidan **crear un proyecto nuevo** para el CH32V003F4P6, haz esto. No
+improvises un `platformio.ini`: usa las plantillas de esta skill.
+
+### 4.1 Vía rápida (recomendada): el script
 
 ```sh
 .opencode/skills/ch32v003-wchlink-ch549/scripts/nuevo-proyecto.sh /ruta/al/proyecto-nuevo
 ```
 
-Deja el proyecto listo: `platformio.ini` con la grabación puesta, `flash.sh`
-ejecutable y un `src/main.cpp` con el blink seguro de PC0. **No sobreescribe
-nada**: si ya existe un `platformio.ini`, se planta.
+Deja el proyecto **listo y autocontenido**:
 
-### 3.2 Vía manual (si el script no encaja)
+| Crea | Qué es |
+|---|---|
+| `platformio.ini` | Con la grabación ya puesta y **sin ninguna ruta absoluta** |
+| `flash.sh` | Copia de la plantilla, ejecutable |
+| `src/main.cpp` | Blink seguro de PC0 (no toca PD1/SWIO ni PD7/NRST) |
+| `.vscode/` | `tasks.json` + `settings.json` + `extensions.json` del proyecto |
+| `.gitignore` | Ignora `.pio/` y `tools/` |
+| `tools/minichlink/minichlink` | Descargado **dentro del proyecto** (si hay red) |
+
+No sobreescribe nada: si ya existe un `platformio.ini`, se planta.
+
+### 4.2 Vía manual
 
 ```sh
 DESTINO=/ruta/al/proyecto-nuevo
 SK=.opencode/skills/ch32v003-wchlink-ch549
 
-mkdir -p "$DESTINO/src"
+mkdir -p "$DESTINO/src" "$DESTINO/.vscode"
 cp "$SK/templates/platformio.ini" "$DESTINO/platformio.ini"
 cp "$SK/templates/flash.sh"       "$DESTINO/flash.sh"
+cp "$SK/templates/vscode/"*.json  "$DESTINO/.vscode/"
 chmod +x "$DESTINO/flash.sh"
+cd "$DESTINO" && ./flash.sh --preparar     # descarga minichlink en el proyecto
 ```
 
-Y añadir a mano en el `[env:...]` del `platformio.ini`, si no viene de la
-plantilla:
-
-```ini
-upload_protocol = custom
-upload_command  = ./flash.sh $SOURCE
-```
-
-### 3.3 Verificar **antes** de dar el trabajo por hecho
+### 4.3 Verificar **antes** de dar el trabajo por hecho
 
 ```sh
 cd "$DESTINO"
-pio run                   # tiene que poner SUCCESS
-SIMULAR=1 ./flash.sh      # dice que grabaria, sin grabar nada
+./flash.sh --help          # el script responde
+./flash.sh --preparar      # minichlink esta dentro del proyecto
+pio run                    # tiene que poner SUCCESS
+SIMULAR=1 ./flash.sh       # dice que grabaria, sin grabar nada
 ```
 
-`SIMULAR=1` es la comprobación clave: si ahí aparece la ruta de `minichlink`, el
-puerto y el `firmware.bin`, la grabación real va a funcionar.
+Y comprobar que el `platformio.ini` **no tiene rutas absolutas**:
 
-### 3.4 Después, avisar de dos cosas
+```sh
+grep -nE "/(home|Users|root)/" "$DESTINO/platformio.ini" && echo "MAL: hay rutas absolutas"
+```
 
-- **Dónde está el proyecto**: si queda **dentro** de este repositorio, `flash.sh`
-  encuentra `minichlink` solo. Si está **fuera**, hay que indicárselo (ver §5).
-- **El hardware**: hace falta la resistencia de 1 kΩ en `SWDIO`↔`3V3` (ver §6).
+### 4.4 Lo que NO hay que hacer
 
-### 3.5 Lo que NO hay que hacer
-
+- **No** poner rutas absolutas ni `MINICHLINK=...` en `upload_command`.
 - **No** poner `upload_protocol = wch-link`, `minichlink`, `wlink` ni `isp`.
 - **No** escribir un `c_cpp_properties.json` a mano (lo gestiona PlatformIO IDE).
 - **No** tocar `board_build.core`: el board ya trae `openwch` (es lo correcto).
 
 ---
 
-## 4. Las plantillas (qué contienen)
+## 5. Cómo se hace autocontenido el proyecto
 
-`templates/platformio.ini` — esto, tal cual:
+`flash.sh` busca `minichlink` en este orden y se queda con el primero que
+encuentre:
+
+| Orden | Dónde | Cuándo aplica |
+|---|---|---|
+| 1 | `$MINICHLINK` | Si se indica a mano (anula todo lo demás) |
+| 2 | `<proyecto>/tools/minichlink/minichlink` | **Proyecto autocontenido** |
+| 3 | `tools/ch32v003fun/minichlink/minichlink`, subiendo carpetas | Proyectos dentro de este repositorio |
+| 4 | `minichlink` en el `PATH` | Si ya está instalado en el sistema |
+| 5 | **Lo descarga** en `<proyecto>/tools/minichlink/` | Proyecto suelto, sin red antes |
+
+La descarga (paso 5) viene de un **binario precompilado y oficial del
+propio platform `ch32v`**
+(`Community-PIO-CH32V/tool-minichlink`, rama `linux`). Comprobado que funciona
+con nuestro WCH-Link SWIO. El script dice de dónde lo baja y el `sha256` que ha
+obtenido, y comprueba que es un `ELF` de verdad antes de aceptarlo.
+
+La URL se puede cambiar con `MINICHLINK_URL`.
+
+## 6. Las plantillas (qué contienen)
+
+`templates/platformio.ini` — genérica, sin rutas:
 
 ```ini
 [env:genericCH32V003F4P6]
@@ -101,10 +136,7 @@ platform  = ch32v
 board     = genericCH32V003F4P6
 framework = arduino
 
-; Opcional pero explicito: el board ya trae build.core = openwch.
-; El core "arduino" clasico NO soporta el CH32V003.
-board_build.core = openwch
-
+board_build.core = openwch        ; el board ya lo trae; se deja explicito
 monitor_speed    = 115200
 
 ; --- Grabacion (WCH-Link CH549 con firmware SWIO) --------------------------
@@ -113,12 +145,35 @@ upload_command  = ./flash.sh $SOURCE
 ```
 
 `templates/flash.sh` — el **mismo** fichero que usa este repositorio
-(`ch32v003-blink/flash.sh`), copiado byte a byte. Sus variables de entorno
-opcionales: `PUERTO`, `MINICHLINK`, `OBJCOPY`, `SIMULAR=1`.
+(`ch32v003-blink/flash.sh`), copiado byte a byte.
 
-## 5. Dos trampas concretas
+`templates/vscode/` — se copia a `<proyecto>/.vscode/`:
 
-### El nombre del entorno decide la carpeta de compilación
+| Fichero | Contenido |
+|---|---|
+| `tasks.json` | Tareas *Grabar solo*, *Preparar minichlink* y *Ver información del chip*. Todas llaman a `./flash.sh`, así que sirven en cualquier proyecto |
+| `settings.json` | Cierra el monitor serie al grabar, oculta `.pio/` del explorador, asocia `*.h` con C++ |
+| `extensions.json` | Extensiones recomendadas (PlatformIO, C/C++, OpenCode, corrector ortográfico) |
+
+Las tareas **no** incluyen el *Diagnóstico del entorno* de este repositorio: ese
+script es de aquí y no se copia al proyecto.
+
+### Opciones de `flash.sh`
+
+| Uso | Efecto |
+|---|---|
+| `./flash.sh` | Graba el último firmware compilado |
+| `./flash.sh firmware.elf` | Graba ese firmware (lo llama PlatformIO con `$SOURCE`) |
+| `./flash.sh --preparar` | Asegura `minichlink` (lo descarga si falta) |
+| `./flash.sh --info` | Muestra la información del chip |
+| `./flash.sh --simular` | Dice lo que haría, sin grabar |
+| `./flash.sh --help` | Ayuda |
+
+Variables: `MINICHLINK`, `MINICHLINK_URL`, `OBJCOPY`, `PUERTO`, `SIMULAR=1`.
+
+## 7. Dos trampas concretas
+
+### 7.1 El nombre del entorno decide la carpeta de compilación
 
 El asistente nombra el entorno como la **placa**: `[env:genericCH32V003F4P6]`,
 así que el firmware sale en:
@@ -131,21 +186,18 @@ así que el firmware sale en:
 tiene ese problema: usa el `.elf` que le pasa PlatformIO con `$SOURCE`, y si se
 llama a mano busca `.pio/build/*/firmware.elf`.
 
-### Un proyecto fuera de este repositorio necesita minichlink
+### 7.2 El `.gitignore` del proyecto nuevo
 
-`flash.sh` busca `tools/ch32v003fun/minichlink/minichlink` **hacia arriba** desde
-el proyecto, y si no, en el `PATH`. Si el proyecto está fuera del repositorio:
+El generador ya lo deja puesto. Ignora la compilación y la herramienta
+descargada: el binario de `minichlink` se vuelve a descargar solo, así que no
+hace falta versionarlo.
 
-```ini
-; opcion A: decirlo en la linea de grabacion
-upload_command = MINICHLINK=/ruta/a/tools/ch32v003fun/minichlink/minichlink ./flash.sh $SOURCE
+```gitignore
+.pio/
+tools/
 ```
 
-```sh
-# opcion B: poner minichlink en el PATH
-```
-
-## 6. Recordatorio de hardware
+## 8. Recordatorio de hardware
 
 Ninguna configuración de software arregla esto:
 
@@ -153,7 +205,7 @@ Ninguna configuración de software arregla esto:
 - la **resistencia de 1 kΩ** entre `SWDIO` y `3V3` en el lado del programador,
 - el selector de tensión del programador en **3V3**.
 
-## 7. Mantener las plantillas sincronizadas
+## 9. Mantener las plantillas sincronizadas
 
 `templates/flash.sh` es una copia de `ch32v003-blink/flash.sh`. **Si se cambia
 uno, hay que actualizar el otro**, o la skill creará proyectos con una versión
