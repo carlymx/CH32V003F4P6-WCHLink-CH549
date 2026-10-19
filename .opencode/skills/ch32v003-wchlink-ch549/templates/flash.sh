@@ -18,7 +18,7 @@
 #
 #  Variables de entorno, todas opcionales:
 #      MINICHLINK      ruta a minichlink (tiene prioridad sobre todo lo demas)
-#      MINICHLINK_URL  de donde descargarlo si falta
+#      MINICHLINK_URL  de donde descargarlo (anula la URL fijada de abajo)
 #      OBJCOPY         ruta a riscv-wch-elf-objcopy
 #      PUERTO          puerto serie del programador
 #      SIMULAR=1       no graba: solo informa de lo que haria
@@ -26,9 +26,25 @@
 set -euo pipefail
 
 PROYECTO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MINICHLINK_URL="${MINICHLINK_URL:-https://raw.githubusercontent.com/Community-PIO-CH32V/tool-minichlink/linux/minichlink}"
 MINICHLINK_LOCAL="$PROYECTO/tools/minichlink/minichlink"
 BYID="/dev/serial/by-id/usb-Deqing_CH55xduino_CH55x-if00"
+
+# --- De donde se descarga minichlink ---------------------------------------
+# Es el binario precompilado x86_64 del propio platform ch32v
+# (Community-PIO-CH32V/tool-minichlink, rama "linux").
+#
+# Va FIJADO a un commit concreto, no a la rama: asi el fichero es siempre
+# exactamente el mismo (reproducible) y no cambia sin enterarnos. Se conoce
+# tambien su sha256, y se comprueba antes de usarlo.
+#
+# Si esa URL fallara (por ejemplo, si el repositorio reescribe su historia) o
+# el fichero no coincidiera con el sha256 esperado, se reintenta con la rama.
+# MINICHLINK_URL, si se define, anula todo esto y se usa tal cual.
+MINICHLINK_COMMIT="3bb07051556a58942fff265e7a27419d6f2e70ad"
+MINICHLINK_SHA256="b919351524b42e915b93b1267132fdd8d92c4d26938d2373dcd22c0468cab38a"
+MINICHLINK_URL_FIJA="https://raw.githubusercontent.com/Community-PIO-CH32V/tool-minichlink/$MINICHLINK_COMMIT/minichlink"
+MINICHLINK_URL_RAMA="https://raw.githubusercontent.com/Community-PIO-CH32V/tool-minichlink/linux/minichlink"
+MINICHLINK_URL="${MINICHLINK_URL:-}"
 
 ACCION="grabar"
 ENTRADA=""
@@ -80,32 +96,64 @@ localizar_minichlink() {
 }
 
 descargar_minichlink() {
+    local urls=() url tmp="$MINICHLINK_LOCAL.parcial"
+    if [[ -n "$MINICHLINK_URL" ]]; then
+        urls=("$MINICHLINK_URL")                       # el usuario manda
+    else
+        urls=("$MINICHLINK_URL_FIJA" "$MINICHLINK_URL_RAMA")
+    fi
+
     echo "No encuentro minichlink. Lo descargo dentro del propio proyecto:"
     echo "  destino : $MINICHLINK_LOCAL"
-    echo "  origen  : $MINICHLINK_URL"
     mkdir -p "$(dirname "$MINICHLINK_LOCAL")"
-    local tmp="$MINICHLINK_LOCAL.parcial"
-    if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$MINICHLINK_URL" -o "$tmp"
-    elif command -v wget >/dev/null 2>&1; then
-        wget -qO "$tmp" "$MINICHLINK_URL"
-    else
+
+    for url in "${urls[@]}"; do
+        echo "  origen  : $url"
         rm -f "$tmp"
-        echo "ERROR: necesito 'curl' o 'wget' para descargarlo." >&2
-        echo "       Instala uno, o pasame la ruta:  MINICHLINK=/ruta/a/minichlink" >&2
-        return 1
-    fi
-    # Comprobar que lo descargado es un ejecutable ELF y no una pagina de error
-    if [[ "$(head -c 4 "$tmp" | od -An -tx1 | tr -d ' \n')" != "7f454c46" ]]; then
-        rm -f "$tmp"
-        echo "ERROR: lo descargado no es un ejecutable ELF." >&2
-        echo "       ¿Ha cambiado la URL de MINICHLINK_URL?" >&2
-        return 1
-    fi
-    chmod +x "$tmp"
-    mv "$tmp" "$MINICHLINK_LOCAL"
-    echo "  descargado: $(stat -c%s "$MINICHLINK_LOCAL") bytes"
-    echo "  sha256    : $(sha256sum "$MINICHLINK_LOCAL" | cut -d' ' -f1)"
+        if command -v curl >/dev/null 2>&1; then
+            curl -fsSL "$url" -o "$tmp" 2>/dev/null || true
+        elif command -v wget >/dev/null 2>&1; then
+            wget -qO "$tmp" "$url" 2>/dev/null || true
+        else
+            echo "ERROR: necesito 'curl' o 'wget' para descargarlo." >&2
+            echo "       Instala uno, o pasame la ruta:  MINICHLINK=/ruta/a/minichlink" >&2
+            return 1
+        fi
+
+        # Tiene que ser un ejecutable ELF y no una pagina de error
+        if [[ ! -f "$tmp" ]] || \
+           [[ "$(head -c 4 "$tmp" | od -An -tx1 | tr -d ' \n')" != "7f454c46" ]]; then
+            rm -f "$tmp"
+            echo "  -> no ha servido (no es un ELF; probablemente 404)." >&2
+            continue
+        fi
+
+        # Si es la URL fijada a un commit, comprobar que coincide con el sha256
+        # esperado. Un sha256 distinto en un commit fijo significa que lo que ha
+        # llegado no es el fichero que se probo: no nos fiamos.
+        local verificado="no (URL alternativa)"
+        if [[ "$url" == "$MINICHLINK_URL_FIJA" && -n "$MINICHLINK_SHA256" ]]; then
+            local obtenido
+            obtenido="$(sha256sum "$tmp" | cut -d' ' -f1)"
+            if [[ "$obtenido" != "$MINICHLINK_SHA256" ]]; then
+                rm -f "$tmp"
+                echo "  -> sha256 inesperado ($obtenido). Se prueba otra URL." >&2
+                continue
+            fi
+            verificado="si, coincide con el esperado"
+        fi
+
+        chmod +x "$tmp"
+        mv "$tmp" "$MINICHLINK_LOCAL"
+        echo "  descargado: $(stat -c%s "$MINICHLINK_LOCAL") bytes"
+        echo "  sha256    : $(sha256sum "$MINICHLINK_LOCAL" | cut -d' ' -f1)"
+        echo "  comprobado: $verificado"
+        return 0
+    done
+
+    echo "ERROR: no he podido descargar un minichlink valido." >&2
+    echo "       Prueba con otra URL:  MINICHLINK_URL=<url> $0" >&2
+    return 1
 }
 
 MINICHLINK="$(localizar_minichlink)"

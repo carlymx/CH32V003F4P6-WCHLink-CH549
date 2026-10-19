@@ -45,7 +45,9 @@ este comando hacen exactamente lo mismo.
 2. **Localiza `minichlink`**: `$MINICHLINK` → `<proyecto>/tools/minichlink/` →
    `tools/ch32v003fun/minichlink/` subiendo carpetas → `PATH` → y si no lo
    encuentra, **lo descarga dentro del proyecto** en `<proyecto>/tools/minichlink/`.
-   Así el proyecto es **autocontenido** (ver `proyecto-nuevo.md`).
+   El binario va fijado a un commit concreto y con `sha256` conocido, y se
+   verifica antes de usarlo. Así el proyecto es **autocontenido** (ver
+   `proyecto-nuevo.md`).
 3. Elige el puerto: `$PUERTO` si está definido, si no el enlace `by-id`
    `usb-Deqing_CH55xduino_CH55x-if00`, y si no `/dev/ttyACM0`.
 4. Si le pasan un `.elf` (lo normal desde PlatformIO) lo convierte a `.bin` con

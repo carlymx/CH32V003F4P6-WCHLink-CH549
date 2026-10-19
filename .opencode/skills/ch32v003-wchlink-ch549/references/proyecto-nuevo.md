@@ -119,12 +119,31 @@ encuentre:
 | 5 | **Lo descarga** en `<proyecto>/tools/minichlink/` | Proyecto suelto, sin red antes |
 
 La descarga (paso 5) viene de un **binario precompilado y oficial del
-propio platform `ch32v`**
-(`Community-PIO-CH32V/tool-minichlink`, rama `linux`). Comprobado que funciona
-con nuestro WCH-Link SWIO. El script dice de dónde lo baja y el `sha256` que ha
-obtenido, y comprueba que es un `ELF` de verdad antes de aceptarlo.
+propio platform `ch32v`** (`Community-PIO-CH32V/tool-minichlink`), comprobado
+contra nuestro WCH-Link SWIO.
 
-La URL se puede cambiar con `MINICHLINK_URL`.
+**Va fijado a un commit concreto**, no a la rama `linux`, para que el fichero
+sea siempre exactamente el mismo:
+
+| Dato | Valor |
+|---|---|
+| Commit | `3bb07051556a58942fff265e7a27419d6f2e70ad` (rama `linux`) |
+| `sha256` | `b919351524b42e915b93b1267132fdd8d92c4d26938d2373dcd22c0468cab38a` |
+| Tamaño | 640 464 bytes (ELF x86_64) |
+
+Antes de aceptarlo se comprueba que:
+
+1. es un `ELF` de verdad (no una página de error),
+2. su `sha256` coincide con el esperado.
+
+Si la URL fijada diera `404` (por ejemplo, si el repositorio reescribe su
+historia) o el `sha256` no coincidiera, **se reintenta con la rama** y se avisa
+de que ese fichero no se ha podido verificar. `MINICHLINK_URL`, si se define,
+anula el pin y se usa tal cual.
+
+> Para actualizar el binario a propósito: mirar el commit actual de la rama,
+> cambiarlo en `flash.sh` (y en `templates/flash.sh`), poner el `sha256` nuevo y
+> **probar una grabación real** antes de dar por buena la versión.
 
 ## 6. Las plantillas (qué contienen)
 

@@ -573,7 +573,8 @@ upload_command  = ./flash.sh $SOURCE
    encuentra, **lo descarga dentro del propio proyecto** en
    `<proyecto>/tools/minichlink/`. No usa ninguna ruta absoluta, así que el
    proyecto es **autocontenido**: se puede copiar a otra máquina y sigue
-   funcionando.
+   funcionando. El binario va fijado a un commit concreto y su `sha256` se
+   verifica antes de usarlo.
 2. Localiza el firmware —acepta el `.elf` que le pasa PlatformIO en `$SOURCE`, o
    busca `.pio/build/*/firmware.elf`— y lo convierte a `.bin` si hace falta.
 3. Busca el puerto por su **ID USB** (`/dev/serial/by-id/usb-Deqing_CH55xduino_CH55x-if00`)
