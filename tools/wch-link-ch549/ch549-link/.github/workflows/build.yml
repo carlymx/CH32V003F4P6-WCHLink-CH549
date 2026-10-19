@@ -1,0 +1,71 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Build in the same container as `make docker` locally, rather than with
+      # the runner's apt SDCC. ubuntu-latest ships SDCC 4.2.0; the vendored
+      # ch55xduino USB sources need 4.5.0, which is why the Dockerfile pins
+      # ubuntu:25.10. Using apt here would silently build against a toolchain
+      # nothing was tested on.
+      - name: Build firmware (SDCC pinned by Dockerfile)
+        run: make docker
+
+      - name: Show toolchain
+        run: docker run --rm ch549-link-build sdcc --version | head -1
+
+      # Not `make dist`: that target would try to rebuild the firmware with a
+      # host SDCC that is not installed. The images already exist by now.
+      - name: Assemble web payload
+        run: make manifest
+
+      - name: Report sizes
+        run: |
+          echo "### Firmware" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python3 -c "
+          import json
+          m = json.load(open('dist/manifest.json'))
+          for f in m['firmwares']:
+              print(f\"{f['id']:<16} {f['size']:>7} B  {f['source']}  {f['method']}\")
+          " >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: dist/firmware/*.bin
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: dist
+
+  deploy:
+    needs: firmware
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

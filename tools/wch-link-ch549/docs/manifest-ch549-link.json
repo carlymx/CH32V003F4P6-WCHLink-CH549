@@ -1,0 +1,73 @@
+{
+  "generated": "2026-09-27T10:09:24+00:00",
+  "bootloader": {
+    "vendorId": "0x4348",
+    "productId": "0x55e0"
+  },
+  "firmwares": [
+    {
+      "id": "swio",
+      "name": "SWIO debugger (CH32V003)",
+      "description": "Single-wire debugger. Enumerates as USB-CDC and speaks the ardulink protocol, so minichlink drives it unmodified.",
+      "file": "firmware/swio.bin",
+      "size": 4345,
+      "sha256": "bbfc3b39063336a1c4b6ae0286c573e7b90c294005359338c2e7c1a04c212d23",
+      "source": "built",
+      "method": "isp",
+      "targets": [
+        "CH32V003"
+      ],
+      "usage": "minichlink -C ardulink -c /dev/ttyACM0 -w prog.bin flash -b"
+    },
+    {
+      "id": "wch-riscv",
+      "name": "Stock WCH-Link \u2014 RISC-V mode",
+      "description": "Official WCH firmware. Programs CH32V10x/20x/30x and CH57x. Does NOT support CH32V003.",
+      "file": "firmware/wch-riscv.bin",
+      "size": 45784,
+      "sha256": "eee8b4709ad5080a84ac2da80fbdbea868a64bb280f2ed80943f005c50463cba",
+      "source": "vendor",
+      "method": "isp",
+      "targets": [
+        "CH32V10x",
+        "CH32V20x",
+        "CH32V30x"
+      ]
+    },
+    {
+      "id": "wch-arm",
+      "name": "Stock WCH-Link \u2014 ARM / CMSIS-DAP mode",
+      "description": "Official WCH firmware. ARM SWD debugging plus a USB serial port.",
+      "file": "firmware/wch-arm.bin",
+      "size": 27734,
+      "sha256": "3cf143a3b6061e8f6a4ca7ee809fffe007219cad062adca259d245f996662284",
+      "source": "vendor",
+      "method": "isp",
+      "targets": [
+        "ARM Cortex-M (SWD)"
+      ]
+    },
+    {
+      "id": "wch-riscv-app",
+      "name": "WCH RISC-V app image (IAP only)",
+      "description": "App-only image for WCH's IAP path. Cannot be flashed over ISP - listed for completeness only.",
+      "file": "firmware/wch-riscv-app.bin",
+      "size": 42712,
+      "sha256": "2f198a4512f9c43dfd7381e0e50ca1c5a52e4022abbdd5ccf1e234185fda81d9",
+      "source": "vendor",
+      "method": "iap",
+      "targets": []
+    },
+    {
+      "id": "wch-arm-app",
+      "name": "WCH ARM app image (IAP only)",
+      "description": "App-only image for WCH's IAP path. Cannot be flashed over ISP - listed for completeness only.",
+      "file": "firmware/wch-arm-app.bin",
+      "size": 24662,
+      "sha256": "b6a789840353b30115f9f6f63b7213efa066d1a78be4d224337e50090fe428a6",
+      "source": "vendor",
+      "method": "iap",
+      "targets": []
+    }
+  ]
+}

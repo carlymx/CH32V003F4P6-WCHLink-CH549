@@ -1,0 +1,26 @@
+# ===========================================================================
+#  .gitignore — Programar un CH32V003F4P6 con un WCH-Link CH549
+# ===========================================================================
+#  Se publica TODO el repositorio: el informe (README.md / README_ES.md), la
+#  imagen de portada, la licencia, el proyecto PlatformIO y las herramientas
+#  de terceros (tools/).
+#
+#  La UNICA exclusion es el directorio de compilacion de PlatformIO, que se
+#  regenera en cualquier momento con "pio run".
+# ===========================================================================
+
+# --- Compilacion de PlatformIO (se regenera) --------------------------------
+.pio/
+
+# --- Basura de sistema operativo / editores ---------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*~
+*.swp
+*.swo
