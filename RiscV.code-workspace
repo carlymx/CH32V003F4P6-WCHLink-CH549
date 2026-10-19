@@ -1,0 +1,54 @@
+{
+  // =====================================================================
+  //  Espacio de trabajo de VSCode para este repositorio
+  //
+  //  Abrir con:  File > Open Workspace from File...  ->  RiscV.code-workspace
+  //
+  //  Declara DOS carpetas:
+  //    1. La raiz del repositorio  -> el informe (README_ES.md / README.md)
+  //    2. ch32v003-blink           -> el proyecto PlatformIO
+  //
+  //  Hace falta abrir la carpeta que CONTIENE platformio.ini, porque
+  //  PlatformIO IDE busca el proyecto en la raiz de cada carpeta del
+  //  espacio de trabajo. Si se abre la raiz a secas, la barra de PlatformIO
+  //  sale vacia y no hay botones de Build/Upload.
+  // =====================================================================
+  "folders": [
+    {
+      "name": "Informe (ES/EN)",
+      "path": "."
+    },
+    {
+      "name": "Proyecto PlatformIO",
+      "path": "ch32v003-blink"
+    }
+  ],
+
+  "settings": {
+    // El proyecto ya se ve en su propia carpeta: lo ocultamos en la vista
+    // del informe para no mostrarlo dos veces. (No se borra nada.)
+    "files.exclude": {
+      "ch32v003-blink": true,
+      "**/.pio": true
+    },
+    "search.exclude": {
+      "**/.pio": true
+    },
+
+    // El monitor serie no sirve con este programador (ver la skill).
+    "platformio-ide.autoCloseSerialMonitor": true,
+
+    // Corrector ortografico en los dos idiomas del repositorio.
+    "cSpell.language": "en,es"
+  },
+
+  "extensions": {
+    "recommendations": [
+      "platformio.platformio-ide",
+      "ms-vscode.cpptools-extension-pack",
+      "sst-dev.opencode",
+      "streetsidesoftware.code-spell-checker",
+      "streetsidesoftware.code-spell-checker-spanish"
+    ]
+  }
+}

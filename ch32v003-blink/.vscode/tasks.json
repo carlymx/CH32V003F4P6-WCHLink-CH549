@@ -1,0 +1,45 @@
+{
+  // =====================================================================
+  //  Tareas EXTRA del proyecto (las que PlatformIO no trae de serie)
+  //
+  //  Para compilar y grabar NO hace falta nada de aqui: PlatformIO ya
+  //  registra sus propias tareas y botones.
+  //     Compilar -> Ctrl+Alt+B      Grabar -> Ctrl+Alt+U
+  //  (o los botones de la barra inferior de PlatformIO)
+  //
+  //  Uso de estas:  Terminal > Run Task...  (Ctrl+Shift+P > "Run Task")
+  // =====================================================================
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Reutiliza el ultimo firmware ya compilado, sin volver a compilar.
+      "label": "Grabar solo (sin recompilar)",
+      "type": "shell",
+      "command": "./flash.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      // Lee la cabecera del chip: modelo, tamano de flash y proteccion.
+      "label": "Ver informacion del chip",
+      "type": "shell",
+      "command": "${workspaceFolder}/../tools/ch32v003fun/minichlink/minichlink",
+      "args": [
+        "-C", "ardulink",
+        "-c", "/dev/serial/by-id/usb-Deqing_CH55xduino_CH55x-if00",
+        "-i"
+      ],
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      // Comprueba placa, puerto, permisos y herramientas antes de grabar.
+      "label": "Diagnostico del entorno",
+      "type": "shell",
+      "command": "${workspaceFolder}/../.opencode/skills/ch32v003-wchlink-ch549/scripts/diagnostico.sh",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    }
+  ]
+}
