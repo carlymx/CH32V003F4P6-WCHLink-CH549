@@ -56,6 +56,29 @@ Copyright (c) 2026 carlymx
 > (`ch549-link` y `minichlink` son MIT; `isp55e0` es GPL-3.0); la licencia MIT de
 > arriba cubre **este documento y los scripts propios del proyecto**.
 
+### Licencias de las herramientas incluidas (`tools/`)
+
+El repositorio **incluye copias** de herramientas de terceros dentro de `tools/`.
+**No son mías**: conservan su licencia, su aviso de copyright y, cuando existe, su
+propio fichero `LICENSE` en su carpeta.
+
+| Herramienta | Ubicación | Autor | Licencia | Fuente original |
+|---|---|---|---|---|
+| `ch32v003fun` / `minichlink` | `tools/ch32v003fun/` | [CNLohr](https://github.com/cnlohr) | MIT | <https://github.com/cnlohr/ch32v003fun> |
+| `isp55e0` (binario) | `tools/wch-link-ch549/isp55e0` | [frank-zago](https://github.com/frank-zago) | **GPL-3.0** | <https://github.com/frank-zago/isp55e0> |
+| `wlink-iap` | `tools/wlink-iap/` | [cjacker](https://github.com/cjacker) | MIT | <https://github.com/cjacker/wlink-iap> |
+| `ch549-link` (copia) | `tools/wch-link-ch549/ch549-link/` | [e-labInnovations](https://github.com/e-labInnovations) | MIT | <https://github.com/e-labInnovations/ch549-link> |
+| Firmwares del WCH-Link (`swio.bin`, `wch-riscv.bin`, `wch-arm.bin`) | `tools/wch-link-ch549/firmware/` | WCH / ch549-link | según su origen | — |
+
+> ⚖️ **Sobre `isp55e0` (GPL-3.0):** se incluye ya compilado por comodidad, pero su
+> **código fuente completo** está en el enlace de la tabla y cualquiera puede
+> obtenerlo y recompilarlo desde ahí. Si redistribuyes este repositorio, **mantén
+> esta tabla y los enlaces**.
+>
+> 🏷️ **Marca y firmware:** los nombres *WCH*, *WCH-Link* y los firmwares del
+> programador pertenecen a **WCH (Nanjing Qinheng Microelectronics)**. Aquí solo se
+> documenta su uso y se redistribuyen copias a las que se tuvo acceso legítimo.
+
 ---
 
 
@@ -63,6 +86,7 @@ Copyright (c) 2026 carlymx
 
 0. [Créditos y atribución](#créditos-y-atribución)
    - [Licencia](#licencia)
+   - [Licencias de las herramientas incluidas](#licencias-de-las-herramientas-incluidas-tools)
 1. [Resumen ejecutivo](#1-resumen-ejecutivo)
 2. [El problema](#2-el-problema)
 3. [Diagnóstico: cómo identificamos el programador](#3-diagnóstico-cómo-identificamos-el-programador)

@@ -57,6 +57,29 @@ Copyright (c) 2026 carlymx
 > (`ch549-link` and `minichlink` are MIT; `isp55e0` is GPL-3.0); the MIT license
 > above covers **this document and the project's own scripts**.
 
+### Licenses of the tools bundled here (`tools/`)
+
+This repository **bundles copies** of third-party tools inside `tools/`. They are
+**not mine**: they keep their own licence, copyright notice and, where present,
+their own `LICENSE` file in their folder.
+
+| Tool | Location | Author | License | Original source |
+|---|---|---|---|---|
+| `ch32v003fun` / `minichlink` | `tools/ch32v003fun/` | [CNLohr](https://github.com/cnlohr) | MIT | <https://github.com/cnlohr/ch32v003fun> |
+| `isp55e0` (binary) | `tools/wch-link-ch549/isp55e0` | [frank-zago](https://github.com/frank-zago) | **GPL-3.0** | <https://github.com/frank-zago/isp55e0> |
+| `wlink-iap` | `tools/wlink-iap/` | [cjacker](https://github.com/cjacker) | MIT | <https://github.com/cjacker/wlink-iap> |
+| `ch549-link` (copy) | `tools/wch-link-ch549/ch549-link/` | [e-labInnovations](https://github.com/e-labInnovations) | MIT | <https://github.com/e-labInnovations/ch549-link> |
+| WCH-Link firmwares (`swio.bin`, `wch-riscv.bin`, `wch-arm.bin`) | `tools/wch-link-ch549/firmware/` | WCH / ch549-link | per their origin | — |
+
+> ⚖️ **About `isp55e0` (GPL-3.0):** it is bundled pre-compiled for convenience, but
+> its **complete source code** is at the link in the table and anyone can fetch and
+> rebuild it from there. If you redistribute this repository, **keep this table and
+> the links**.
+>
+> 🏷️ **Trademarks and firmware:** the names *WCH*, *WCH-Link* and the programmer
+> firmwares belong to **WCH (Nanjing Qinheng Microelectronics)**. This report only
+> documents their use and redistributes copies that were legitimately obtained.
+
 ---
 
 
@@ -64,6 +87,7 @@ Copyright (c) 2026 carlymx
 
 0. [Credits and attribution](#credits-and-attribution)
    - [License](#license)
+   - [Licenses of the tools bundled here](#licenses-of-the-tools-bundled-here-tools)
 1. [Executive summary](#1-executive-summary)
 2. [The problem](#2-the-problem)
 3. [Diagnosis: how we identified the programmer](#3-diagnosis-how-we-identified-the-programmer)

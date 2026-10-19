@@ -8,7 +8,8 @@ usando un **WCH-Link antiguo (CH549) reflasheado** como programador SWIO.
 - Grabación: `pio run -t upload` → `flash.sh` → `minichlink` (protocolo ardulink)
 
 > El informe completo del proceso, el diagnóstico del programador y las
-> referencias están en [`../INFORME-CH32V003-WCHLink-CH549.md`](../INFORME-CH32V003-WCHLink-CH549.md).
+> referencias están en [`../README_ES.md`](../README_ES.md) — y su traducción al
+> inglés en [`../README.md`](../README.md).
 
 ---
 
@@ -126,3 +127,22 @@ Volver al firmware de fábrica (pierde el soporte de CH32V003):
 ./isp55e0 -f firmware/wch-riscv.bin   # modo RISC-V
 ./isp55e0 -f firmware/wch-arm.bin     # modo ARM / CMSIS-DAP
 ```
+
+---
+
+## 6. Créditos y licencia
+
+La solución técnica de fondo **no es mía**:
+
+| Aportación | Autor | Licencia |
+|---|---|---|
+| Firmware SWIO del CH549, protocolo ISP y documentación | [`ch549-link`](https://github.com/e-labInnovations/ch549-link) (e-labInnovations) | MIT |
+| `minichlink` y el protocolo *ardulink* | [`ch32v003fun`](https://github.com/cnlohr/ch32v003fun) (CNLohr) | MIT |
+| Flasheador del bootloader CH55x `isp55e0` | [`frank-zago`](https://github.com/frank-zago/isp55e0) | **GPL-3.0** |
+| Plataforma y core Arduino | [`platform-ch32v`](https://github.com/Community-PIO-CH32V/platform-ch32v) / [`arduino_core_ch32`](https://github.com/openwch/arduino_core_ch32) | — |
+| **Este proyecto** (código, `flash.sh`, informe) | carlymx | **MIT** (ver [`../LICENSE`](../LICENSE)) |
+
+El repositorio incluye copias de esas herramientas en `../tools/`, **con sus
+propias licencias y avisos de copyright** (ver la tabla completa de licencias de
+terceros en el informe, §"Licencias de las herramientas incluidas"). Ojo:
+`isp55e0` es **GPL-3.0**.
